@@ -10,4 +10,16 @@ class CardGameClientApplicationTests {
     void contextLoads() {
     }
 
+    @Test
+    public void test1(){
+        String s="";
+        String[] split = s.split(",");
+        for(String s1:split){
+            System.out.println(s1);
+            System.out.println();
+        }
+        System.out.println(split.length);
+
+    }
+
 }
