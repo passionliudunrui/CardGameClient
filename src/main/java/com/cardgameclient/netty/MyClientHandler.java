@@ -1,6 +1,5 @@
 package com.cardgameclient.netty;
 
-
 import com.cardgameclient.proto.MessagePOJO;
 import com.cardgameclient.thread.WaitingThread;
 import com.cardgameclient.utils.MD5Util;
@@ -66,18 +65,17 @@ public class MyClientHandler extends SimpleChannelInboundHandler<MessagePOJO.Mes
 
         int id1=message.getId1();//哪个模块
         int id2=message.getId2();//模块对应的消息
+        int id3=message.getId3();
         String context=message.getContext();
 
         String[]data=context.split(",");
 
         switch (id1){
             case 1:
-
                 log.info("服务端返回注册消息");
                 handlerApply(id2,context);
                 break;
             case 2:
-
                 log.info("服务端返回登录信息");
                 judgeLog(id2,context);
                 break;
@@ -86,26 +84,95 @@ public class MyClientHandler extends SimpleChannelInboundHandler<MessagePOJO.Mes
                 printMessage(context);
                 break;
             case 4:
-                log.info("");
-
+                log.info("服务端返回TopTen");
+                printMessage(context);
+                break;
+            case 5:
+                log.info("服务端返回加入游戏结果");
+                showAnswer(context);
+                break;
+            case 6:
+                log.info("服务端返回开始游戏的结果");
+                playGame(id2,id3,context);
+                break;
 
         }
 
 
     }
 
+    private void showAnswer(String context) {
+        System.out.println(context);
+        System.out.println("................................");
+    }
+
+
+    /**
+     * 打牌的整个业务
+     * @param  id3
+     * @param id2
+     * @param context
+     */
+    private void playGame(int id2, int id3,String context) {
+        if(id2==0){
+            if(id3==0){
+                //匹配成功加入游戏
+                System.out.println(context);
+            }
+            else if(id3==1){
+                //先出牌
+                System.out.println(context);
+                choose();
+            }
+            else if(id3==2){
+                //等待对方出牌
+                System.out.println(context);
+            }
+            else{
+                //id3=4  对方不要 继续出牌
+                System.out.println(context);
+                choose();
+            }
+
+        }
+        else if(id2==1){
+            System.out.println(context);
+            choose();
+        }
+        else if(id2==2){
+            System.out.println(context);
+            write();
+        }
+        else{
+            System.out.println("服务端发送的信息错误");
+        }
+    }
+
+    /**
+     * 用户选择出牌逻辑
+     */
+    public void choose(){
+        System.out.println("请输入你选择的牌 或者输入不要");
+        String poker=scanner.next();
+        MessagePOJO.Message message1;
+        if(poker.equals("不要")){
+            message1=Transfrom.transform(6, 0, poker);
+        }
+        else{
+            message1 = Transfrom.transform(6, 1, poker);
+        }
+
+        ctx.writeAndFlush(message1);
+    }
 
     /**
      * 显示服务器返回的消息
      * @param context
      */
     private void printMessage(String context) {
-
         System.out.println(context);
-
         write();
     }
-
 
     /**
      * 注册模块
@@ -151,7 +218,6 @@ public class MyClientHandler extends SimpleChannelInboundHandler<MessagePOJO.Mes
         else{
             System.out.println("输入错误，请重新输入");
         }
-
     }
 
     /**
@@ -161,13 +227,10 @@ public class MyClientHandler extends SimpleChannelInboundHandler<MessagePOJO.Mes
         System.out.println("请输入登录的账号和密码");
         String id=scanner.next();
         String paswd=scanner.next();
-
         String password = MD5Util.md5(paswd);
         System.out.println("加密后 "+password);
-
         String context=id+","+password;
         MessagePOJO.Message message = Transfrom.transform(2, context);
-
         ctx.writeAndFlush(message);
     }
 
@@ -180,7 +243,6 @@ public class MyClientHandler extends SimpleChannelInboundHandler<MessagePOJO.Mes
             //进行下一步操作
             System.out.println("成功进入游戏大厅");
             write();
-
         }
         else{
             System.out.println("登录失败，请重新输入账号密码");
