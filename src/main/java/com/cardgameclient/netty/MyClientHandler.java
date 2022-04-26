@@ -10,7 +10,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 import java.util.Scanner;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -99,11 +98,120 @@ public class MyClientHandler extends SimpleChannelInboundHandler<MessagePOJO.Mes
                 log.info("服务端返回更新用户信息的结果");
                 printMessage(context);
                 break;
+            case 9:
+                log.info("服务端返回购买欢乐豆的信息");
+                buyHappyBean(id2,context);
+                break;
 
         }
 
 
     }
+
+
+
+    /**
+     * 主菜单选项
+     * 用户进入游戏的选择按钮
+     */
+    private void write(){
+        Tools.display();
+        int choice=scanner.nextInt();
+
+        switch (choice){
+            case 3:
+                sendMessage(3);
+                break;
+            case 4:
+                sendMessage(4);
+                break;
+            case 5:
+                sendMessage(5);
+                break;
+            case 6:
+                sendMessage(6);
+                break;
+            case 7:
+                sendMessage(7);
+                break;
+            case 8:
+                sendMessage(8);
+                break;
+            case 10:
+                modifyInfo();
+                break;
+            case 9:
+                sendMessage(9,1);
+                break;
+
+        }
+    }
+
+
+
+    /**
+     * 注册模块
+     */
+    private void apply(){
+        System.out.println("请输入手机号 昵称  密码");
+        String id=scanner.next();
+        String nickName=scanner.next();
+        String paswd=scanner.next();
+        String password = MD5Util.md5(paswd);
+        System.out.println("加密后 "+password);
+
+        String context=id+","+nickName+","+password;
+        MessagePOJO.Message message= Transfrom.transform(1,context);
+
+        ctx.writeAndFlush(message);
+    }
+
+    /**
+     * 处理服务端返回的注册消息
+     * @param id2
+     * @param context
+     */
+    private void handlerApply(int id2,String context){
+
+        if(id2==1){
+            System.out.println("申请账号成功");
+        }
+        else{
+            System.out.println("申请账号失败");
+        }
+
+        Tools.display2();
+
+        int choice=scanner.nextInt();
+
+        if(choice==1){
+            apply();
+        }
+        else if(choice==2){
+            register();
+        }
+        else{
+            System.out.println("输入错误，请重新输入");
+        }
+    }
+
+    /**
+     * 登录模块
+     */
+    private void register(){
+        System.out.println("请输入登录的账号和密码");
+        String id=scanner.next();
+        String paswd=scanner.next();
+        String password = MD5Util.md5(paswd);
+        System.out.println("加密后 "+password);
+        String context=id+","+password;
+        MessagePOJO.Message message = Transfrom.transform(2, context);
+        ctx.writeAndFlush(message);
+    }
+
+
+
+
 
     private void showAnswer(String context) {
         System.out.println(context);
@@ -179,66 +287,6 @@ public class MyClientHandler extends SimpleChannelInboundHandler<MessagePOJO.Mes
     }
 
     /**
-     * 注册模块
-     */
-    private void apply(){
-        System.out.println("请输入手机号 昵称  密码");
-        String id=scanner.next();
-        String nickName=scanner.next();
-        String paswd=scanner.next();
-        String password = MD5Util.md5(paswd);
-        System.out.println("加密后 "+password);
-
-        String context=id+","+nickName+","+password;
-        MessagePOJO.Message message= Transfrom.transform(1,context);
-
-        ctx.writeAndFlush(message);
-    }
-
-    /**
-     * 处理服务端返回的注册消息
-     * @param id2
-     * @param context
-     */
-    private void handlerApply(int id2,String context){
-
-        if(id2==1){
-            System.out.println("申请账号成功");
-        }
-        else{
-            System.out.println("申请账号失败");
-        }
-
-        Tools.display2();
-
-        int choice=scanner.nextInt();
-
-        if(choice==1){
-            apply();
-        }
-        else if(choice==2){
-            register();
-        }
-        else{
-            System.out.println("输入错误，请重新输入");
-        }
-    }
-
-    /**
-     * 登录模块
-     */
-    private void register(){
-        System.out.println("请输入登录的账号和密码");
-        String id=scanner.next();
-        String paswd=scanner.next();
-        String password = MD5Util.md5(paswd);
-        System.out.println("加密后 "+password);
-        String context=id+","+password;
-        MessagePOJO.Message message = Transfrom.transform(2, context);
-        ctx.writeAndFlush(message);
-    }
-
-    /**
      * 验证登录模块
      */
     private void judgeLog(int id2,String context) {
@@ -269,7 +317,7 @@ public class MyClientHandler extends SimpleChannelInboundHandler<MessagePOJO.Mes
             System.out.println("请输入登录的账号和密码");
             String id=scanner.next();
             String passwd=scanner.next();
-            String password=MD5Util.inputPassToFromPass(passwd);
+            String password=MD5Util.md5(passwd);
             String cotext1=id+","+password;
 
             MessagePOJO.Message message = Transfrom.transform(2, cotext1);
@@ -280,38 +328,29 @@ public class MyClientHandler extends SimpleChannelInboundHandler<MessagePOJO.Mes
     }
 
     /**
-     * 用户进入游戏的选择按钮
+     * 发送消息模块
+     * @param id1
      */
-    private void write(){
-        Tools.display();
-        int choice=scanner.nextInt();
 
-        switch (choice){
-            case 3:
-                sendMessage(3);
-                break;
-            case 4:
-                sendMessage(4);
-                break;
-            case 5:
-                sendMessage(5);
-                break;
-            case 6:
-                sendMessage(6);
-                break;
-            case 7:
-                sendMessage(7);
-                break;
-            case 8:
-                sendMessage(8);
-                break;
-            case 10:
-                modifyInfo();
-                break;
-        }
+    private void sendMessage(int id1){
+
+        System.out.println("发送消息给服务端");
+        MessagePOJO.Message message = Transfrom.transform(id1, "");
+        ctx.writeAndFlush(message);
 
     }
+    /**
+     * 发送消息重载
+     */
+    private void sendMessage(int id1,int id2){
+        System.out.println("发消息给服务端");
+        MessagePOJO.Message message = Transfrom.transform(id1, id2, "");
+        ctx.writeAndFlush(message);
+    }
 
+    /**
+     * 修改用户信息模块
+     */
     private void modifyInfo() {
         System.out.println("请输入新的用户名和密码");
         String nickName=scanner.next();
@@ -323,37 +362,24 @@ public class MyClientHandler extends SimpleChannelInboundHandler<MessagePOJO.Mes
         ctx.writeAndFlush(message1);
     }
 
-    private void sendMessage(int id1){
-
-        System.out.println("发送消息给服务端");
-        MessagePOJO.Message message = Transfrom.transform(id1, "");
-        ctx.writeAndFlush(message);
+    /**
+     * 处理购买欢乐豆的信息
+     * @param id2   0表示余额不足
+     * @param context
+     */
+    private void buyHappyBean(int id2, String context) {
+        //完成
+        if(id2==1){
+            System.out.println(context);
+            write();
+        }
+        //失败
+        else if(id2==2){
+            System.out.println(context);;
+            write();
+        }
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 }
