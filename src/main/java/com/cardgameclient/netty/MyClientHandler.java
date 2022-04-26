@@ -95,6 +95,10 @@ public class MyClientHandler extends SimpleChannelInboundHandler<MessagePOJO.Mes
                 log.info("服务端返回开始游戏的结果");
                 playGame(id2,id3,context);
                 break;
+            case 10:
+                log.info("服务端返回更新用户信息的结果");
+                printMessage(context);
+                break;
 
         }
 
@@ -301,11 +305,22 @@ public class MyClientHandler extends SimpleChannelInboundHandler<MessagePOJO.Mes
             case 8:
                 sendMessage(8);
                 break;
+            case 10:
+                modifyInfo();
+                break;
         }
 
+    }
 
+    private void modifyInfo() {
+        System.out.println("请输入新的用户名和密码");
+        String nickName=scanner.next();
+        String passwd=scanner.next();
+        String password = MD5Util.md5(passwd);
 
+        MessagePOJO.Message message1 = Transfrom.transform(10, 1, nickName + "," + password);
 
+        ctx.writeAndFlush(message1);
     }
 
     private void sendMessage(int id1){
